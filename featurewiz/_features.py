@@ -7,7 +7,7 @@ def features_info_print(dataset):
     :param dataset:
     :return:
     """
-    print(f"{'Feature':<30}{'dtype':<10}{'#missing':>10}{'%missing':>10}   {'FeatureType':<30}\n")
+    print(f"{'Feature':<40}{'dtype':<10}{'#missing':>10}{'%missing':>10}   {'FeatureType':<30}\n")
     for feature, dtype in dataset.dtypes.items():
         unique_values = set(dataset[feature].dropna())
         missing_cnt = sum(pd.isnull(dataset[feature]))
@@ -17,4 +17,4 @@ def features_info_print(dataset):
         else:
             ftype = 'Numeric'
 
-        print(f"{feature:<30}{str(dtype):<10}{missing_cnt:>10}{missing_cnt/len(dataset)*100:>10.1f}%   {ftype:<10}")
+        print(f"{feature:<40}{str(dtype):<10}{missing_cnt:>10}{missing_cnt/len(dataset)*100:>10.1f}%   {ftype:<10}")
