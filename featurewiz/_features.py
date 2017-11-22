@@ -64,3 +64,23 @@ def encode_one_hot(series, series_name, max_categories=30, as_dict=True):
         return dummydf.to_dict(orient='series')
     else:
         return dummydf
+
+
+def imput_spikes(series, q=0.01, window=None, ffill=True):
+    if q > 0.5:
+        raise ValueError(f"q parameter must be <= 0.5, got {q}")
+    if window is None:
+        q_upper = series.expanding().quantile(1.0-q)
+        q_lower = series.expanding().quantile(q)
+    else:
+        q_upper = series.rolling(window).quantile(1.0 - q)
+        q_lower = series.rolling(window).quantile(q)
+
+    _series = series.copy()
+    _series[_series > q_upper] = q_upper
+    _series[_series < q_lower] = q_lower
+
+    if ffill:
+        _series.ffill(inplace=True)
+
+    return _series
