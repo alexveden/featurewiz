@@ -106,15 +106,27 @@ def pctrank(series, period, category=None, categorize_by=None) -> pd.Series:
     if categorize_by is None:
         return result_series
     else:
-        if isinstance(categorize_by, (int, np.int64, np.int32, np.int16, np.int8)):
-            bins_range = [100/categorize_by*i for i in range(categorize_by + 1)]
-        else:
-            bins_range = categorize_by
+        return categorize(result_series, categorize_by)
 
-        assert bins_range[0] == 0.0, 'categorize_by must include zero at the first element'
-        assert bins_range[-1] == 100.0, 'categorize_by must include 100 at the last element'
 
-        return pd.cut(result_series, bins=bins_range, labels=False, include_lowest=True)
+def categorize(series, by):
+    """
+    Categorize series by bins or custom ranges
+    :param series:
+    :param by: category ranked values by decile size. Must be integer or sequence. categorize_by=3 will create
+               3 uniform categories, and categorize_by=[0, 33, 66, 100] will return 3 categories
+               [0-33;33-66;66-100]. It allows to use non-uniform categories width.
+    :return:
+    """
+    if isinstance(by, (int, np.int64, np.int32, np.int16, np.int8)):
+        bins_range = [100 / by * i for i in range(by + 1)]
+    else:
+        bins_range = by
+
+    assert bins_range[0] == 0.0, 'categorize_by must include zero at the first element'
+    assert bins_range[-1] == 100.0, 'categorize_by must include 100 at the last element'
+
+    return pd.cut(series, bins=bins_range, labels=False, include_lowest=True)
 
 
 
