@@ -7,7 +7,6 @@ setup(name='featurewiz',
       author='Alex Veden',
       author_email='i@alexveden.com',
       license='MIT',
-      packages=['funniest'],
       install_requires=[
           'pandas',
       ],
