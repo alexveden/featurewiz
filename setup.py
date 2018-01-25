@@ -7,7 +7,10 @@ setup(name='featurewiz',
       author='Alex Veden',
       author_email='i@alexveden.com',
       license='MIT',
+      packages=['featurewiz'],
       install_requires=[
-          'pandas',
+            'pandas',
+            'numpy',
+            'scipy'
       ],
       zip_safe=False)
