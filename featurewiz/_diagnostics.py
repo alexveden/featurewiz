@@ -103,7 +103,7 @@ def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scorin
     try:
         if hasattr(estimator, 'booster'):
             # XGBOOST!
-            importance = estimator.booster().get_fscore()
+            importance = estimator.get_booster().get_fscore()
             importance = sorted(importance.items(), key=operator.itemgetter(1))
 
             df = pd.DataFrame(importance, columns=['feature', 'fscore']).set_index('feature')
