@@ -182,7 +182,12 @@ def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scorin
     #
     # Global Mean Model: always use _y_test_naive.mean() as prediction
     #
-    score_df['naive_mean'] = scoring(_y_test_naive, np.full(len(_y_test_naive), _y_test_naive.mean()))
+    try:
+        score_df['naive_mean'] = scoring(_y_test_naive, np.full(len(_y_test_naive), _y_test_naive.mean()))
+    except ValueError:
+        # In case if scoring is classification (skip naive average!)
+        score_df['naive_mean'] = np.full(len(_y_test_naive), np.nan)
+
 
     plt.figure()
     plt.title('Feature importance validation curve')
