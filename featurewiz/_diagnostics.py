@@ -80,7 +80,7 @@ def plot_learning_curve(estimator, X, y, scoring, ylim=None, cv=None,
     return plt
 
 
-def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scoring, base_estimator=None):
+def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scoring, scoring_kwargs={}, base_estimator=None):
     """
     ML model features importance diagnostic plot.
     The algorithm outline:
@@ -92,8 +92,10 @@ def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scorin
     :param estimator: ML model (must implement .feature_importance_ or .coef_ or to be XGBoost model)
     :param X: X features
     :param y: y-target
-    :param scoring: scoring function f(y_true, y_predicted), see. sklearn.metrics
+    :param scoring: scoring function f(y_true, y_predicted), see sklearn.metrics help
+    :param scoring_kwargs: additional kwargs for scoring function (like sample_weights=), see sklearn.metrics help
     :param base_estimator: None or model class with .fit() / .predict()
+
     :return: pd.DataFrame for each model scores
     """
     #
@@ -145,10 +147,10 @@ def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scorin
         y_predicted_worst_train = estimator.predict(_X_train_w)
 
         # Evaluate models
-        score_best_test = scoring(_y_test_b, y_predicted_best_test)
-        score_worst_test = scoring(_y_test_w, y_predicted_worst_test)
-        score_best_train = scoring(_y_train_b, y_predicted_best_train)
-        score_worst_train = scoring(_y_train_w, y_predicted_worst_train)
+        score_best_test = scoring(_y_test_b, y_predicted_best_test, **scoring_kwargs)
+        score_worst_test = scoring(_y_test_w, y_predicted_worst_test, **scoring_kwargs)
+        score_best_train = scoring(_y_train_b, y_predicted_best_train, **scoring_kwargs)
+        score_worst_train = scoring(_y_train_w, y_predicted_worst_train, **scoring_kwargs)
 
         rfe_result.append({
             'column': sorted_X.columns[i],
@@ -177,13 +179,13 @@ def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scorin
     rnd_errs = np.full(rnd_predictions.shape[0], np.nan)
 
     for i in range(rnd_predictions.shape[0]):
-        rnd_errs[i] = scoring(_y_test_naive.values, rnd_predictions[i])
+        rnd_errs[i] = scoring(_y_test_naive.values, rnd_predictions[i], **scoring_kwargs)
     score_df['naive_random'] = pd.Series(rnd_errs).dropna().mean()
     #
     # Global Mean Model: always use _y_test_naive.mean() as prediction
     #
     try:
-        score_df['naive_mean'] = scoring(_y_test_naive, np.full(len(_y_test_naive), _y_test_naive.mean()))
+        score_df['naive_mean'] = scoring(_y_test_naive, np.full(len(_y_test_naive), _y_test_naive.mean()), **scoring_kwargs)
     except ValueError:
         # In case if scoring is classification (skip naive average!)
         score_df['naive_mean'] = np.nan
@@ -220,8 +222,8 @@ def plot_feature_learning_curve(estimator, X: pd.DataFrame, y: pd.Series, scorin
         _y_base_test = base_estimator.predict(_X_test_naive)
         _y_base_train = base_estimator.predict(_X_train_naive)
 
-        score_df['score_base_test'] = scoring(_y_test_naive, _y_base_test)
-        score_df['score_base_train'] = scoring(_y_train_naive, _y_base_train)
+        score_df['score_base_test'] = scoring(_y_test_naive, _y_base_test, **scoring_kwargs)
+        score_df['score_base_train'] = scoring(_y_train_naive, _y_base_train, **scoring_kwargs)
 
         plt.plot(score_df.index, score_df['score_base_test'], '-', color="blue",
                  label="Base test score")
